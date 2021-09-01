@@ -4,3 +4,9 @@ members = [
     "lux-core",
     "lux-cli",
 ]
+
+[profile.release]
+lto = "thin"
+
+[profile.bench]
+lto = "thin"
