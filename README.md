@@ -2,5 +2,4 @@
 
 ---
 
-*This stuff'll kill ya*
-*It's loaded with fun*
+<p align="center"><i>This stuff'll kill ya, it's loaded with fun</i></p>
