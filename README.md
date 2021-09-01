@@ -1,4 +1,4 @@
-<p align="center">lux</p>
+<h1 align="center">lux</h1>
 
 ---
 
