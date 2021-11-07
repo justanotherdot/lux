@@ -1,30 +1,15 @@
-/// An individual chunk of bytecode.
-///
-/// This houses the individual instructions and their supplied arguments.
-#[derive(Debug, PartialEq)]
-pub struct Chunk {
-    code: Vec<u8>,
-}
-
-/// All supported instructions. The associated number for an `Instruction` is known as its
-/// "opcode".
-pub enum Instruction {
-    Return = 0,
-}
-
-pub enum InstructionError {
-    UnknownOpcode(u8),
-}
+use crate::data::{Chunk, Instruction};
+use crate::error::InstructionError;
 
 // TODO: Debug + Display trait impls for Instruction, possibly.
 impl Instruction {
-    fn name(&self) -> String {
+    pub fn name(&self) -> String {
         match self {
             Instruction::Return => String::from("OP_RETURN"),
         }
     }
 
-    fn from_byte(byte: u8) -> Result<Instruction, InstructionError> {
+    pub fn from_byte(byte: u8) -> Result<Instruction, InstructionError> {
         match byte {
             0 => Ok(Instruction::Return),
             1..=u8::MAX => Err(InstructionError::UnknownOpcode(byte)),
