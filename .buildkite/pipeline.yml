@@ -1,4 +1,8 @@
 steps:
-  - label: "Test"
+  - label: "Tests"
     command:
       - "cargo test"
+
+  - label: "Snapshots"
+    command:
+      - "bin/test-snapshot"
