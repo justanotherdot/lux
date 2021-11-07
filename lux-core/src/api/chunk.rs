@@ -1,4 +1,4 @@
-use crate::data::{Chunk, Instruction};
+use crate::data::{Chunk, Instruction, Value};
 use crate::error::InstructionError;
 
 // TODO: Debug + Display trait impls for Instruction, possibly.
@@ -6,13 +6,15 @@ impl Instruction {
     pub fn name(&self) -> String {
         match self {
             Instruction::Return => String::from("OP_RETURN"),
+            Instruction::Constant => String::from("OP_CONSTANT"),
         }
     }
 
     pub fn from_byte(byte: u8) -> Result<Instruction, InstructionError> {
         match byte {
             0 => Ok(Instruction::Return),
-            1..=u8::MAX => Err(InstructionError::UnknownOpcode(byte)),
+            1 => Ok(Instruction::Constant),
+            2..=u8::MAX => Err(InstructionError::UnknownOpcode(byte)),
         }
     }
 }
@@ -27,6 +29,13 @@ fn simple_instruction(instruction: &Instruction, offset: usize) -> usize {
     offset + 1
 }
 
+fn constant_instruction(instruction: &Instruction, chunk: &Chunk, offset: usize) -> usize {
+    let constant = chunk.code[offset + 1];
+    print!("'{:-16} {:4} '", instruction.name(), constant);
+    println!("{}", chunk.constants[constant as usize]);
+    offset + 2
+}
+
 fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
     print!("{:04} ", offset);
     // FIXME: an offset may exceed the bounds of the stored code.
@@ -36,6 +45,9 @@ fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
     let instruction = Instruction::from_byte(opcode);
     match instruction {
         Ok(instruction @ Instruction::Return) => simple_instruction(&instruction, offset),
+        Ok(instruction @ Instruction::Constant) => {
+            constant_instruction(&instruction, chunk, offset)
+        }
         Err(InstructionError::UnknownOpcode(opcode)) => unknown_instruction(opcode, offset),
     }
 }
@@ -43,11 +55,19 @@ fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
 impl Chunk {
     /// Create a new bytecode chunk.
     pub fn new() -> Chunk {
-        Chunk { code: vec![] }
+        Chunk {
+            code: vec![],
+            constants: vec![],
+        }
     }
 
     pub fn write(&mut self, byte: u8) {
         self.code.push(byte);
+    }
+
+    pub fn add_constant(&mut self, value: Value) -> usize {
+        self.constants.push(value);
+        self.constants.len() - 1
     }
 
     pub fn dissassemble(&self, name: &str) {
@@ -67,6 +87,12 @@ mod test {
     fn chunks_store_code() {
         let mut chunk = Chunk::new();
         chunk.write(Instruction::Return as u8);
-        assert_eq!(chunk, Chunk { code: vec![0] });
+        assert_eq!(
+            chunk,
+            Chunk {
+                code: vec![0],
+                constants: vec![]
+            }
+        );
     }
 }
