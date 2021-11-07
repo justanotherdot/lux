@@ -7,6 +7,7 @@ pub struct Chunk {
     pub code: Vec<u8>,
     // TODO: to TinyVec, max 255 I believe?
     pub constants: Vec<Value>,
+    pub lines: Vec<i32>,
 }
 
 /// All supported instructions. The associated number for an `Instruction` is known as its

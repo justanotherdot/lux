@@ -38,6 +38,11 @@ fn constant_instruction(instruction: &Instruction, chunk: &Chunk, offset: usize)
 
 fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
     print!("{:04} ", offset);
+    if offset > 0 && chunk.lines[offset] == chunk.lines[offset - 1] {
+        print!("   | ");
+    } else {
+        print!("{:4} ", chunk.lines[offset]);
+    }
     // FIXME: an offset may exceed the bounds of the stored code.
     // hence it would be an error that should be known when
     // disassembling. This error should not be in the form of a panic.
@@ -58,11 +63,13 @@ impl Chunk {
         Chunk {
             code: vec![],
             constants: vec![],
+            lines: vec![],
         }
     }
 
-    pub fn write(&mut self, byte: u8) {
+    pub fn write(&mut self, byte: u8, line: i32) {
         self.code.push(byte);
+        self.lines.push(line);
     }
 
     pub fn add_constant(&mut self, value: Value) -> usize {
@@ -86,13 +93,8 @@ mod test {
     #[test]
     fn chunks_store_code() {
         let mut chunk = Chunk::new();
-        chunk.write(Instruction::Return as u8);
-        assert_eq!(
-            chunk,
-            Chunk {
-                code: vec![0],
-                constants: vec![]
-            }
-        );
+        chunk.write(Instruction::Return as u8, 123);
+        assert_eq!(chunk.code, vec![0],);
+        assert_eq!(chunk.lines, vec![123],);
     }
 }
