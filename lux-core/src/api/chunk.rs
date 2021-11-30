@@ -7,14 +7,26 @@ impl Instruction {
         match self {
             Instruction::Return => String::from("OP_RETURN"),
             Instruction::Constant => String::from("OP_CONSTANT"),
+            Instruction::Negate => String::from("OP_NEGATE"),
+            Instruction::Add => String::from("OP_ADD"),
+            Instruction::Subtract => String::from("OP_SUBTRACT"),
+            Instruction::Multiply => String::from("OP_MULTIPLY"),
+            Instruction::Divide => String::from("OP_DIVIDE"),
         }
     }
 
+    // NOTE: I forget to add these. there should be an easier way to have
+    // the compiler guide me to do it.
     pub fn from_byte(byte: u8) -> Result<Instruction, InstructionError> {
         match byte {
             0 => Ok(Instruction::Return),
             1 => Ok(Instruction::Constant),
-            2..=u8::MAX => Err(InstructionError::UnknownOpcode(byte)),
+            2 => Ok(Instruction::Negate),
+            3 => Ok(Instruction::Add),
+            4 => Ok(Instruction::Subtract),
+            5 => Ok(Instruction::Multiply),
+            6 => Ok(Instruction::Divide),
+            _ => Err(InstructionError::UnknownOpcode(byte)),
         }
     }
 }
@@ -36,7 +48,7 @@ fn constant_instruction(instruction: &Instruction, chunk: &Chunk, offset: usize)
     offset + 2
 }
 
-fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
+pub fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
     print!("{:04} ", offset);
     if offset > 0 && chunk.lines[offset] == chunk.lines[offset - 1] {
         print!("   | ");
@@ -53,6 +65,11 @@ fn dissassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
         Ok(instruction @ Instruction::Constant) => {
             constant_instruction(&instruction, chunk, offset)
         }
+        Ok(instruction @ Instruction::Negate) => simple_instruction(&instruction, offset),
+        Ok(instruction @ Instruction::Add) => simple_instruction(&instruction, offset),
+        Ok(instruction @ Instruction::Subtract) => simple_instruction(&instruction, offset),
+        Ok(instruction @ Instruction::Multiply) => simple_instruction(&instruction, offset),
+        Ok(instruction @ Instruction::Divide) => simple_instruction(&instruction, offset),
         Err(InstructionError::UnknownOpcode(opcode)) => unknown_instruction(opcode, offset),
     }
 }
