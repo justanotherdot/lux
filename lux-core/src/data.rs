@@ -1,7 +1,7 @@
 /// An individual chunk of bytecode.
 ///
 /// This houses the individual instructions and their supplied arguments.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Chunk {
     // TODO: to TinyVec
     pub code: Vec<u8>,
@@ -19,6 +19,11 @@ pub struct Chunk {
 pub enum Instruction {
     Return = 0,
     Constant = 1,
+    Negate = 2,
+    Add = 3,
+    Subtract = 4,
+    Multiply = 5,
+    Divide = 6,
 }
 
 // TODO: This ought to be an enum, unless constants are
